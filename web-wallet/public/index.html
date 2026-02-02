@@ -1,0 +1,3113 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>DCR Wallet</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
+
+:root{
+  --bg: var(--bg0);
+  
+  --bg0:#071022;
+  --bg1:#0A1A33;
+  --text2:#F6FAFF;
+  --muted2:rgba(246,250,255,.82);
+  --a:#00FFC2;
+  --a2:#2AA9FF;
+  --a3:#00E5FF;
+  --a4:#9DFF2E;
+  --shadowT: 0 26px 90px rgba(0,0,0,.55);
+  --shadowT2: 0 18px 70px rgba(0,0,0,.42);
+  --ease: cubic-bezier(.16,.84,.26,1);
+  --panel: rgba(15, 22, 48, .62);
+  --panel2: rgba(10, 14, 32, .72);
+  --stroke: rgba(130, 190, 255, .16);
+
+  --text: rgba(240, 248, 255, .92);
+  --mut: rgba(240, 248, 255, .62);
+
+  --blue:#2ac9ff;
+  --cyan:#00f8ff;
+  --vio:#7948ff;
+
+  --glow: 0 0 18px rgba(42,169,255,.30), 0 0 44px rgba(0,229,255,.14);
+  --shadow: 0 30px 90px rgba(0,0,0,.65);
+
+  --r: 18px;
+  --r2: 14px;
+
+--font: "Space Grotesk", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+--mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+html, body{
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; background:var(--bg); color:var(--text); }
+body{ width:100%; font-family: var(--font); }
+
+
+body{
+  background: #000;
+  background-color: var(--bg0);
+  color: var(--text);
+  overflow-x: hidden;
+  letter-spacing: .01em;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  background:
+    radial-gradient(900px 520px at 50% 10%, rgba(42,169,255,.16), transparent 65%),
+    radial-gradient(760px 520px at 18% 22%, rgba(0,229,255,.12), transparent 68%),
+    radial-gradient(760px 520px at 82% 26%, rgba(0,255,194,.12), transparent 70%),
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size:
+    auto,
+    auto,
+    auto,
+    38px 38px,
+    38px 38px;
+  opacity:.65;
+}
+
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.020) 0px, rgba(255,255,255,.020) 1px, transparent 1px, transparent 3px),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.14) 0px, rgba(0,0,0,.14) 1px, transparent 1px, transparent 4px);
+  opacity:.18;
+}
+
+.app{
+  position: relative;
+  z-index: 1; 
+}
+
+
+.seq {
+  opacity: 0;
+  transform: translateY(-40px);
+}
+
+
+.seq.show {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 1s ease,
+    transform 1s ease;
+}
+
+
+.reveal{
+  opacity:0;
+  transform: translate3d(0, -18px, 0) scale(.992);
+  transition: opacity .7s var(--ease), transform .7s var(--ease);
+  will-change: transform, opacity;
+}
+.reveal.show{
+  opacity:1;
+  transform: translate3d(0,0,0) scale(1);
+}
+@media (prefers-reduced-motion: reduce){
+  .reveal, .reveal.show{ transition:none; transform:none; opacity:1; }
+  body::before, body::after{ opacity:.12; }
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+  overflow: auto;
+}
+.pages{
+  flex: 1;
+  overflow: hidden;    
+  min-height: 0;       
+}
+
+
+.page{
+  height: 100%;
+  overflow-y: auto;         
+  padding-bottom: 80px;     
+}
+
+
+.walletList,
+.txList{
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.pageScroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 24px;
+}
+
+.mono{ font-family: var(--mono); }
+b{ font-weight: 700; }
+
+.app{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 14px 0; 
+  background:
+    radial-gradient(620px 520px at 78% 12%, rgba(0,229,255,.12), transparent 58%),
+    radial-gradient(520px 420px at 22% 0%, rgba(42,169,255,.18), transparent 60%),
+    radial-gradient(720px 520px at 50% -10%, rgba(108,124,255,.12), transparent 62%),
+    linear-gradient(180deg, #060a18, #040611);
+}
+
+
+.backdrop[hidden],
+.sheet[hidden]{
+  display:none !important;
+}
+
+
+.top{ display:flex; gap:10px; align-items:center; justify-content:space-between; }
+.chip{
+  flex:1;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.04);
+  border-radius: 16px;
+  padding: 10px 12px;
+  display:flex; align-items:center; gap:10px;
+  cursor:pointer;
+}
+.chipTitle{ font-weight:700; font-size:13px; color: rgba(240, 248, 255, .92); }
+.chipSub{
+  color:var(--mut);
+  font-size:12px;
+  max-width: 180px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.chev{ margin-left:auto; color:rgba(240,248,255,.7); }
+
+.pill{
+  border:1px solid var(--stroke);
+  background: rgba(0,0,0,.22);
+  border-radius: 999px;
+  padding: 8px 10px;
+  display:flex; gap:8px; align-items:center;
+  font-weight:700; font-size:12px;
+}
+.dot{
+  width:8px; height:8px; border-radius:50%;
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  box-shadow: 0 0 0 4px rgba(0,229,255,.12);
+}
+
+.account{
+  margin-top: 12px;
+  padding: 12px;
+
+  border-radius: var(--r);
+  border: 1px solid var(--stroke);
+
+  background: rgba(255,255,255,.045);
+
+  
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 8px 24px rgba(0,0,0,.35);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  transition:
+    transform .22s cubic-bezier(.16,.84,.26,1),
+    box-shadow .22s cubic-bezier(.16,.84,.26,1);
+}
+
+
+.account:hover{
+  transform: translateY(-1.5px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 14px 36px rgba(0,0,0,.45);
+}
+
+
+.account:active{
+  transform: translateY(-0.5px);
+}
+
+.acctRow{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.acctName{ font-weight:700; font-size:14px; }
+.acctAddr{ color:var(--mut); font-size:12px; }
+
+.iconBtn{
+  width: 25px; height:25px;
+  border-radius: 1px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor:pointer;
+}
+
+
+.bal{
+  margin-top: 12px;
+  border-radius: 22px;
+  padding: 16px;
+  border:1px solid rgba(42,169,255,.32);
+  background:
+    radial-gradient(260px 260px at 90% 8%, rgba(0,229,255,.22), transparent 58%),
+    radial-gradient(420px 320px at 16% 12%, rgba(42,169,255,.24), transparent 60%),
+    linear-gradient(135deg, rgba(12,18,40,.92), rgba(7,10,22,.92));
+  overflow:hidden;
+}
+.bal:hover{
+  
+  transform: translateY(-2px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 -14px 22px rgba(0,0,0,.22),
+    0 18px 42px rgba(0,0,0,.45),
+    0 0 34px rgba(42,169,255,.12);
+}
+.balLabel{ font-weight:700; letter-spacing:.08em; font-size:14px; color: rgba(240, 248, 255, .92); }
+.balMain{ display:flex; align-items:baseline; gap:10px; margin-top: 6px; }
+.balNum{
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing:.02em;
+  text-shadow: 0 0 22px rgba(42,169,255,.18), 0 0 44px rgba(0,229,255,.10);
+}
+.balUnit{ font-size: 24px; font-weight:700; color: rgba(240,248,255,.70); }
+.balUsd{ margin-top: 6px; font-weight:700; font-size:14px; color: rgba(240,248,255,.70); }
+.balAtoms{ margin-top: 6px; font-size:12px; color: rgba(240,248,255,.56); }
+
+.balSplit{
+  margin-top: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.01);
+  border:1px solid rgba(130,190,255,.12);
+  padding: 10px;
+  display:grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items:center;
+}
+.balSplit:hover{
+
+  border:1px solid rgba(130,190,255,.3);
+
+}
+.splitItem .k{ font-size:14px; color: rgba(240,248,255,.68); font-weight:700; }
+.splitItem .v{ margin-top:4px; font-weight:700; font-size:14px; }
+.splitItem .sub{ margin-top:4px; font-size:14px; color: rgba(240,248,255,.58); }
+.syncBtn{
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border:1px solid rgba(42,169,255,.35);
+  background: linear-gradient(135deg, rgba(42,169,255,.30), rgba(0,229,255,.16));
+  color: rgba(240,248,255,.92);
+  font-weight: 700;
+  cursor:pointer;
+  box-shadow: 0 0 18px rgba(42,169,255,.12);
+}
+
+
+.actions{
+  margin-top: 14px;
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.act{
+  border-radius: 16px;
+  border: 1px solid rgba(130,190,255,.16);
+
+  
+  background:
+    radial-gradient(220px 140px at 50% 0%, rgba(42,169,255,.08), transparent 70%),
+    radial-gradient(260px 200px at 85% 25%, rgba(42,169,255,.10), transparent 62%),
+    rgba(42,169,255,.04);
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  padding: 12px 10px;
+  color: var(--text);
+  cursor: pointer;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+
+  
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 -14px 22px rgba(0,0,0,.22),
+    0 10px 26px rgba(0,0,0,.35);
+
+  transform: translateZ(0);
+  will-change: transform, box-shadow, filter;
+
+  transition:
+    transform .20s cubic-bezier(.16,.84,.26,1),
+    box-shadow .22s cubic-bezier(.16,.84,.26,1),
+    background .22s cubic-bezier(.16,.84,.26,1);
+}
+
+.act:hover{
+  
+  transform: translateY(-2px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 -14px 22px rgba(0,0,0,.22),
+    0 18px 42px rgba(0,0,0,.45),
+    0 0 34px rgba(42,169,255,.12);
+}
+
+.act:active{
+  transform: translateY(-1px) scale(.99);
+}
+
+
+.ico img{
+  height: 34px;
+  transition:
+    transform .20s cubic-bezier(.16,.84,.26,1),
+    filter .22s cubic-bezier(.16,.84,.26,1);
+  will-change: transform;
+}
+.act:hover .ico img{
+  transform: translateY(-1px) scale(1.06);
+  filter: drop-shadow(0 12px 22px rgba(42,169,255,.18));
+}
+
+
+.txt{
+  font-weight: 700;
+  font-size: 14px;
+  color: #98d6ff;
+  transition: opacity .20s ease, transform .20s ease;
+}
+.act:hover .txt{
+  transform: translateY(1px);
+  opacity: .95;
+}
+
+
+.bbar{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 82px;
+
+  background: rgba(10,14,28,.92);
+  border-top:1px solid rgba(130,190,255,.10);
+
+  display: flex;
+  justify-content: center; 
+
+  padding: 0 10px;
+  z-index: 50;
+}
+
+
+.bbar-inner{
+  width: 100%;
+  max-width: 1120px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+
+.backdrop{
+  position: fixed; inset:0;
+  background: rgba(0,0,0,.66);
+  z-index: 50;
+}
+.sheet{
+  position: fixed;
+  left: 12px; right:12px; bottom: 12px;
+  border-radius: 22px;
+  border:1px solid rgba(130,190,255,.16);
+  background:
+    radial-gradient(520px 320px at 20% 0%, rgba(42,169,255,.14), transparent 60%),
+    radial-gradient(520px 320px at 88% 10%, rgba(0,229,255,.10), transparent 62%),
+    rgba(10,14,28,.96);
+  z-index: 60;
+  overflow:hidden;
+  box-shadow: var(--glow), var(--shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.sheetHead{
+  padding: 12px 12px;
+  display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid rgba(130,190,255,.10);
+}
+.sheetTitle{ font-weight:700; }
+.x{
+  width: 40px; height: 40px;
+  border-radius: 14px;
+  border:1px solid rgba(130,190,255,.14);
+  background: rgba(42,169,255,.10);
+  color: var(--text);
+  cursor:pointer;
+}
+.sheetBody{ padding: 12px; }
+
+.label{ color: var(--mut); font-weight:700; font-size:12px; margin: 0 0 6px; }
+.input{
+  width:100%;
+  border-radius: 14px;
+  border:1px solid rgba(130,190,255,.12);
+  background: rgba(0,0,0,.20);
+  color: var(--text);
+  padding: 12px;
+  outline:none;
+  font-family: var(--font);
+}
+.input:focus{
+  border-color: rgba(42,169,255,.40);
+  box-shadow: 0 0 0 3px rgba(42,169,255,.16);
+}
+.box{
+  border-radius: 14px;
+  border:1px solid rgba(130,190,255,.12);
+  background: rgba(0,0,0,.18);
+  padding: 12px;
+  word-break: break-word;
+  color: rgba(240,248,255,.90);
+}
+
+.row{
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+
+  justify-content: center;    flex-wrap: wrap;         
+}
+
+
+.btn{
+  height: 44px;
+  border-radius: 14px;
+  border:1px solid rgba(130,190,255,.14);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  font-weight:700;
+  cursor:pointer;
+  padding: 0 12px;
+  flex:1;
+}
+.btn.primary{
+  border-color: rgba(42,169,255,.38);
+  background: linear-gradient(135deg, rgba(42,169,255,.34), rgba(0,229,255,.14));
+  box-shadow: 0 0 18px rgba(42,169,255,.12);
+}
+.btn.ghost{ background: transparent; }
+.btn.sm{ height: 36px; border-radius: 12px; flex:0; padding: 0 12px; }
+.btn.danger{
+  border-color: rgba(255,90,90,.28);
+  background: rgba(255,90,90,.10);
+}
+.btn:hover{
+  border-color: rgba(42,169,255,.38);
+  background: linear-gradient(135deg, rgba(42,169,255,.34), rgba(0,229,255,.14));
+  box-shadow: 0 0 18px rgba(42,169,255,.12);
+}
+
+.tiny{ margin-top:10px; color: var(--mut); font-size:12px; }
+.tiny.warn{ color: rgba(255,220,140,.78); }
+
+
+.hintRow{
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.hintLeft{ display:flex; flex-direction:column; gap:2px; }
+.tiny2{ font-size:12px; color: rgba(240,248,255,.72); }
+
+
+.walletList{ display:flex; flex-direction:column; gap:10px; }
+.wRow{
+  border-radius: 16px;
+  border:1px solid rgba(130,190,255,.12);
+  background: rgba(255,255,255,.04);
+  padding: 12px;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px;
+  cursor:pointer;
+}
+.wRow:hover{ border-color: rgba(42,169,255,.24); box-shadow: 0 0 18px rgba(42,169,255,.10); }
+.wMeta{ min-width:0; }
+.wName{ font-weight:700; font-size:13px; }
+.wAddr{ color: var(--mut); font-size:12px; }
+.wBtns{ display:flex; gap:8px; }
+.iconBtn2{
+  width: 40px; height: 40px;
+  border-radius: 14px;
+  border:1px solid rgba(130,190,255,.14);
+  background: rgba(42,169,255,.10);
+  color: var(--text);
+  cursor:pointer;
+}
+
+
+.txList{ display:flex; flex-direction:column; gap:10px; }
+.txRow{
+  border-radius: 16px;
+  border:1px solid rgba(130,190,255,.12);
+  background: rgba(255,255,255,.04);
+  padding: 12px;
+}
+.txTop{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.txid{ color: rgba(240,248,255,.88); font-size:12px; }
+.txConf{ color: rgba(240,248,255,.62); font-size:12px; }
+.txBot{ margin-top:6px; color: rgba(240,248,255,.56); font-size:12px; }
+
+
+.toast{
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 66px;
+
+  padding: 14px 16px;
+  border-radius: 18px;
+
+  border: 1px solid rgba(130,190,255,.18);
+  background:
+    radial-gradient(220px 120px at 50% 0%, rgba(42,169,255,.18), transparent 70%),
+    rgba(10,14,28,.92);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 12px 40px rgba(0,0,0,.45),
+    0 0 28px rgba(42,169,255,.18);
+
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+
+  z-index: 80;
+
+  
+  opacity: 0;
+  transform: translate3d(0, 14px, 0) scale(.98);
+  pointer-events: none;
+
+  transition:
+    opacity .28s cubic-bezier(.16,.84,.26,1),
+    transform .28s cubic-bezier(.16,.84,.26,1);
+}
+
+.toast.show{
+  opacity: 1;
+  transform: translate3d(0,0,0) scale(1);
+}
+
+.txCard{
+  border-radius: 18px;
+  border:1px solid rgba(130,190,255,.12);
+  background: rgba(255,255,255,.04);
+  padding: 14px;
+}
+.txStatusOk{
+  font-weight: 700;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border:1px solid rgba(0,229,255,.22);
+  background: rgba(0,229,255,.10);
+  color: rgba(220,255,255,.92);
+  box-shadow: 0 0 18px rgba(0,229,255,.08);
+}
+.txRight{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  justify-content:flex-end;
+}
+.txBtn{
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border:1px solid rgba(130,190,255,.14);
+  background: rgba(42,169,255,.10);
+  color: rgba(240,248,255,.92);
+  font-weight:700;
+  cursor:pointer;
+}
+.txBtn:hover{ box-shadow: 0 0 18px rgba(42,169,255,.12); }
+
+.pages{ position:relative; }
+.page{ display:none; }
+.page.on{
+  display:block;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 90px; 
+}
+#page-history {
+overflow: hidden;
+ }
+
+.phead{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+.back{
+  width: 40px; height: 40px;
+  border-radius: 14px;
+  border:1px solid rgba(130,190,255,.14);
+  background: rgba(42,169,255,.10);
+  color: var(--text);
+  cursor:pointer;
+}
+.ptitle{
+  font-weight: 700;
+  font-size: 14px;
+}
+.pspace{ flex:1; }
+
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-top: 6px;
+}
+.tab{
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border:1px solid rgba(130,190,255,.14);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  font-weight:700;
+  cursor:pointer;
+}
+.tab.on{
+  border-color: rgba(42,169,255,.34);
+  background: rgba(42,169,255,.14);
+  box-shadow: 0 0 18px rgba(42,169,255,.10);
+}
+.panel{ display:none; }
+.panel.on{ display:block; }
+
+.ta{
+  width:100%;
+  min-height: 110px;
+  resize: vertical;
+  border-radius: 14px;
+  border:1px solid rgba(130,190,255,.12);
+  background: rgba(0,0,0,.20);
+  color: var(--text);
+  padding: 12px;
+  outline:none;
+  font-family: var(--font);
+}
+
+.txMeta{
+  margin-top:4px;
+  color: rgba(240,248,255,.50);
+  font-size: 12px;
+}
+.net{
+  font-weight: 700;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(130,190,255,.14);
+  background: rgba(255,255,255,.04);
+  white-space: nowrap;
+}
+.net.plus{
+  border-color: rgba(0,229,255,.22);
+  background: rgba(0,229,255,.10);
+  color: rgba(220,255,255,.92);
+  box-shadow: 0 0 18px rgba(0,229,255,.08);
+}
+.net.minus{
+  border-color: rgba(255,120,120,.22);
+  background: rgba(255,120,120,.10);
+  color: rgba(255,220,220,.92);
+}
+.net.zero{
+  border-color: rgba(130,190,255,.12);
+  background: rgba(255,255,255,.03);
+  color: rgba(240,248,255,.70);
+}
+
+
+.netIcon{ width:18px; display:block; }
+
+
+.bico{
+  width:20px;
+  height:20px;
+  display:block;
+  opacity:.95;
+}
+.bbtn span{ line-height:1; }
+
+
+.qrWrap{
+  background: transparent;
+  padding: 12px;
+  border-radius: 14px;
+  display: flex;              
+  justify-content: center;    
+  align-items: center;        
+  box-shadow: 0 12px 30px rgba(0,0,0,.25);
+  margin-top: 12px;
+}
+#qrBox img{
+  display:block;
+  width: 200px;
+  height: 200px;
+}
+
+
+.feeRow{
+  margin-top: 10px;
+  border-radius: 14px;
+  border:1px solid rgba(130,190,255,.12);
+  background: rgba(0,0,0,.18);
+  padding: 10px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+#sFee{ color: rgba(240,248,255,.88); font-size:12px; }
+
+
+body{
+  padding: 18px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(900px 560px at 75% 10%, rgba(42,169,255,.18), transparent 60%),
+    radial-gradient(760px 520px at 20% 0%, rgba(0,248,255,.10), transparent 62%),
+    linear-gradient(180deg, #070b1d, #040611);
+}
+
+
+.app{
+  max-width: 420px;
+  margin: 0 auto;
+  border: 1px solid rgba(130, 190, 255, .16);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 24px 90px rgba(0,0,0,.55);
+}
+
+
+@media(min-width: 900px){
+  body{ padding: 28px; }
+  .app{
+    max-width: 1120px;
+    border-radius: 26px;
+  }
+  .pages{
+    min-height: calc(100vh - 56px - 28px - 28px); 
+  }
+  .page{
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+  .top{
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+  
+  .cards{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid2{ grid-template-columns: 1fr 1fr; }
+}
+@media(min-width: 1240px){
+  .cards{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+
+.netSel{
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+
+.pill.netBtn{
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,.22);
+  border-radius: 999px;
+  padding: 8px 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.pill.netBtn:hover{
+  border-color: rgba(42,169,255,.26);
+  box-shadow: 0 0 18px rgba(42,169,255,.10);
+}
+
+.pill.netBtn:active{
+  transform: translateY(1px);
+}
+
+.netName{ line-height: 1; font-size: 16px }
+.chevNet{
+  margin-left: 2px;
+  color: rgba(240,248,255,.70);
+}
+
+
+.netMenu{
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+
+  border-radius: 16px;
+  border: 1px solid var(--stroke);
+  background: var(--panel2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  padding: 8px;
+  z-index: 120;
+}
+
+
+.netItem{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 10px;
+  border-radius: 14px;
+
+  border: 1px solid transparent;
+  background: rgba(255,255,255,.03);
+  color: rgba(240,248,255,.90);
+
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.netItem:hover{
+  border-color: rgba(42,169,255,.22);
+  box-shadow: 0 0 18px rgba(42,169,255,.10);
+  background: rgba(255,255,255,.05);
+}
+
+.netItem.is-active{
+  border-color: rgba(0,229,255,.26);
+  background: rgba(0,229,255,.08);
+}
+
+.netItem[disabled],
+.netItem[aria-disabled="true"]{
+  opacity: .50;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
+.netItem[disabled]:hover{
+  border-color: transparent;
+  background: rgba(255,255,255,.03);
+}
+
+
+.netTag{
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(130,190,255,.12);
+  background: rgba(0,0,0,.18);
+  color: rgba(240,248,255,.72);
+}
+
+.netTag.muted{
+  color: rgba(240,248,255,.60);
+}
+
+
+.netMenu .netIcon{
+  width: 18px;
+
+  display: block;
+}
+
+
+.exploreGrid{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+@media(max-width: 520px){
+  .exploreGrid{ grid-template-columns: 1fr; }
+}
+
+
+.exIcons{
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+
+.exIconBtn{
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+
+  border: 1px solid rgba(130,190,255,.14);
+  background: rgba(42,169,255,.10);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  box-shadow: none;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+}
+
+.exIconBtn img{
+  width: 22px;
+  height: 22px;
+  display: block;
+  opacity: .95;
+  filter: drop-shadow(0 0 10px rgba(42,169,255,.10));
+}
+
+.exIconBtn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(42,169,255,.26);
+  box-shadow: 0 0 18px rgba(42,169,255,.12);
+  background: rgba(42,169,255,.14);
+}
+
+.exIconBtn:active{
+  transform: translateY(0px);
+}
+
+
+.exIconBtn:focus-visible,
+.pill.netBtn:focus-visible,
+.netItem:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(42,169,255,.16), 0 0 18px rgba(42,169,255,.10);
+  border-color: rgba(42,169,255,.30);
+}
+
+
+.acctRow,
+.bal{
+  position: relative;
+  overflow: hidden;
+}
+
+
+.acctRow > *,
+.bal > *{
+  position: relative;
+  z-index: 1;
+}
+
+
+.acctRow::before,
+.bal::before{
+  content:"";
+  position:absolute;
+  inset:-80px; 
+  pointer-events:none;
+  z-index:0;
+  opacity:.55;
+
+  
+  background-image:
+    linear-gradient(rgba(152,214,255,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(152,214,255,.06) 1px, transparent 1px),
+    radial-gradient(circle at 18px 18px, rgba(152,214,255,.22) 2px, transparent 3px),
+    radial-gradient(circle at 64px 44px, rgba(45,216,163,.18) 2px, transparent 3px),
+    radial-gradient(circle at 92px 88px, rgba(203,92,255,.16) 2px, transparent 3px);
+
+  background-size:
+    60px 60px,
+    60px 60px,
+    120px 120px,
+    160px 160px,
+    220px 220px;
+
+  background-position:
+    0 0,
+    0 0,
+    0 0,
+    30px 90px,
+    80px 40px;
+
+  animation: walletSquaresUp 12s linear infinite;
+  filter: saturate(1.05);
+
+  
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+}
+
+@keyframes walletSquaresUp{
+  from{
+    background-position:
+      0 0,
+      0 0,
+      0 0,
+      30px 90px,
+      80px 40px;
+  }
+  to{
+    background-position:
+      0 -420px,
+      0 -420px,
+      0 -840px,
+      30px -630px,
+      80px -700px;
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce){
+  .acctRow::before,
+  .bal::before{
+    animation: none;
+  }
+}
+
+
+@media (max-width: 520px){
+
+  .bbar{
+    height: 118px;            
+    padding: 10px 10px 12px;
+  }
+
+  .bbar-inner{
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);  
+    grid-auto-rows: 1fr;                    
+    gap: 10px;
+    align-items: center;
+    justify-items: center;
+  }
+
+  .bbtn{
+    width: 100%;
+    min-width: 0;
+    padding: 8px 6px;
+    border-radius: 14px;
+    gap: 4px;
+  }
+
+  .bico{
+    width: 22px;
+    height: 22px;
+  }
+
+  .bbtn span{
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: .02em;
+  }
+
+  
+  .page.on{
+    padding-bottom: 132px; 
+  }
+}
+@media (max-width: 520px){
+  .bbar{
+    height: auto;                 
+    padding: 8px 10px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .bbar-inner{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .bbtn{
+    width: 100%;
+    min-width: 0;
+    padding: 6px 6px;
+    gap: 2px;
+  }
+
+  .bico{ width: 24px; height: 24px; }
+  .bbtn span{ font-size: 9px; line-height: 1; }
+
+  
+  .page.on{
+    padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+
+.rv{
+  opacity: 0;
+  transform: translate3d(0, -18px, 0);
+  transition: opacity .72s var(--ease), transform .72s var(--ease);
+  will-change: opacity, transform;
+}
+.rv.in{
+  opacity: 1;
+  transform: translate3d(0,0,0);
+}
+
+
+footer.bbar{
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 60;
+}
+
+
+.acctRow::before,
+.bal::before{
+  animation-duration: 28s;
+}
+
+
+button{
+  transition: border-color .22s var(--ease), background .22s var(--ease), box-shadow .22s var(--ease), transform .18s var(--ease), filter .22s var(--ease);
+}
+button img{
+  transition: transform .22s var(--ease), filter .22s var(--ease), opacity .22s var(--ease);
+  will-change: transform;
+}
+
+
+button:has(img):hover img{
+  transform: translate3d(0,-1px,0) scale(1.10);
+  filter: drop-shadow(0 12px 24px rgba(42,169,255,.18));
+}
+button:has(img):active img{
+  transform: scale(.96);
+}
+
+
+button:not(:has(img)):hover{
+  transform: translate3d(0,-1px,0);
+  border-color: rgba(42,169,255,.28);
+  box-shadow: 0 0 18px rgba(42,169,255,.10), 0 0 48px rgba(0,229,255,.06);
+}
+button:not(:has(img)):active{
+  transform: translate3d(0,0,0) scale(.985);
+}
+
+
+.act .txt{ transition:none; }
+
+
+footer.bbar{
+  background: rgba(10,14,28,.92);
+  border-top:1px solid rgba(130,190,255,.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+footer.bbar .bbtn{
+  appearance:none;
+  cursor:pointer;
+
+  
+  border-radius: 14px;
+  border: 1px solid rgba(130,190,255,.16);
+  background:
+    radial-gradient(180px 110px at 50% 0%, rgba(42,169,255,.10), transparent 70%),
+    rgba(42,169,255,.04);
+
+  
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  padding: 10px 10px;
+  min-width: 92px;
+
+  
+  color: #98d6ff;
+  font-weight:700;
+  font-size:12px;
+
+  
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 -12px 18px rgba(0,0,0,.22),
+    0 8px 18px rgba(0,0,0,.28);
+
+  transition:
+    transform .18s var(--ease),
+    box-shadow .22s var(--ease),
+    background .22s var(--ease),
+    color .18s ease;
+}
+
+footer.bbar .bbtn > span{
+  color: inherit;
+  line-height: 1;
+}
+
+footer.bbar .bbtn .bico{
+  width:20px;
+  height:20px;
+  opacity:.95;
+  transition: transform .18s var(--ease), filter .22s ease, opacity .22s ease;
+}
+
+
+footer.bbar .bbtn:hover{
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.07),
+    inset 0 -12px 18px rgba(0,0,0,.22),
+    0 14px 30px rgba(0,0,0,.40),
+    0 0 28px rgba(42,169,255,.12);
+}
+
+footer.bbar .bbtn:hover .bico{
+  transform: translateY(-1px) scale(1.06);
+  filter: drop-shadow(0 12px 22px rgba(42,169,255,.18));
+}
+
+
+footer.bbar .bbtn.active{
+  color: #98d6ff;
+  background:
+    radial-gradient(200px 120px at 50% 0%, rgba(42,169,255,.18), transparent 70%),
+    rgba(42,169,255,.06);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -12px 18px rgba(0,0,0,.22),
+    0 14px 32px rgba(0,0,0,.42),
+    0 0 34px rgba(42,169,255,.16);
+}
+
+footer.bbar .bbtn.active .bico{
+  filter: drop-shadow(0 0 14px rgba(110,231,255,.26));
+}
+
+footer.bbar .bbtn:active{
+  transform: translateY(0) scale(.98);
+}
+
+
+footer.bbar .bbtn:hover img{ transform: translate3d(0,-1px,0) scale(1.07); }
+
+
+@media (prefers-reduced-motion: reduce){
+  .rv, .rv.in{ transition:none !important; transform:none !important; opacity:1 !important; }
+  .acctRow::before, .bal::before{ animation:none !important; }
+}
+
+footer.bbar .bbtn.soon{
+  opacity: .55;
+  cursor: default;
+}
+
+
+footer.bbar .bbtn.soon:hover,
+footer.bbar .bbtn.soon:active{
+  transform: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 -12px 18px rgba(0,0,0,.22),
+    0 8px 18px rgba(0,0,0,.28);
+}
+
+
+footer.bbar .bbtn.soon::after{
+  content: attr(data-soon);
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 10px;
+
+  padding: 6px 10px;
+  border-radius: 10px;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
+
+  color: #98d6ff;
+  background: rgba(10,14,28,.92);
+  border: 1px solid rgba(110,231,255,.28);
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.45),
+    0 0 24px rgba(42,169,255,.18);
+
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+
+  transition:
+    opacity .18s ease,
+    transform .18s ease;
+  white-space: nowrap;
+  z-index: 200;
+}
+
+
+footer.bbar .bbtn.soon:hover::after{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+</style>
+</head>
+<body>
+  <div class="app">
+
+    
+    <header class="top">
+      <button class="chip" id="btnOpenWallets">
+        <span class="chipTitle" id="activeLabel">Wallet</span>
+        <span class="chipSub" id="activeShort">No wallet</span>
+        <span class="chev">▾</span>
+      </button>
+
+<div class="netSel" id="netSel">
+  <button class="pill netBtn" id="netBtn" type="button" aria-haspopup="true" aria-expanded="false">
+    <img class="netIcon" src="https://i.ibb.co/fd1zKm49/logodcr.png" alt="Decred"/>
+    <span class="netName" id="netName">Decred</span>
+    <span class="chevNet">▾</span>
+  </button>
+
+  <div class="netMenu" id="netMenu" hidden>
+    <button class="netItem is-active" type="button" data-net="dcr">
+      <img class="netIcon" src="https://i.ibb.co/fd1zKm49/logodcr.png" alt="Decred"/>
+      <span>Decred</span>
+      <span class="netTag">Active</span>
+    </button>
+
+    <button class="netItem" type="button" data-net="btc" disabled aria-disabled="true" title="Coming soon">
+      <img class="netIcon" src="https://assets.coingecko.com/coins/images/1/standard/bitcoin.png?1696501400" alt="Bitcoin"/>
+      <span>Bitcoin</span>
+      <span class="netTag muted">Soon</span>
+    </button>
+
+    <button class="netItem" type="button" data-net="ltc" disabled aria-disabled="true" title="Coming soon">
+      <img class="netIcon" src="https://assets.coingecko.com/coins/images/2/standard/litecoin.png?1696501400" alt="Litecoin"/>
+      <span>Litecoin</span>
+      <span class="netTag muted">Soon</span>
+    </button>
+  </div>
+</div>
+
+    </header>
+
+    
+    <main class="pages">
+
+      
+      <section class="page on" id="page-home">
+<section class="account seq">
+          <div class="acctRow">
+            <div>
+              <div class="balLabel">ADDRESS</div>
+              <div class="acctAddr mono" id="addr">—</div>
+            </div>
+<div>
+            <button class="iconBtn" id="btnCopyAddr" title="Copy"><img style="width:20px;"   src="https://img.icons8.com/?size=100&id=cTgJnRhpif49&format=png&color=98d6ff"></button>
+            <button class="iconBtn" id="btnSync" title="Sync"><img style="width:20px;"   src="https://img.icons8.com/?size=100&id=33936&format=png&color=98d6ff"></button>
+          </div>          </div>
+
+        </section>
+
+<section class="bal seq">
+          <div class="balLabel">TOTAL BALANCE</div>
+
+          <div class="balMain">
+            <div class="balNum" id="balDcr">0.00000000</div>
+            <div class="balNum">DCR</div>
+          </div>
+
+          <div class="balUsd" id="balUsd">$0.00</div>
+          <div class="balAtoms mono" id="balAtoms">—</div>
+
+          <div class="balSplit">
+            <div class="splitItem">
+              <div class="k">Available</div>
+              <div class="v"><span id="availDcr">0.00000000</span> <b>DCR</b></div>
+            </div>
+
+            <div class="splitItem" id="pendingWrap">
+              <div class="k">Pending</div>
+              <div class="v"><span id="pendingDcr">0.00000000</span> <b>DCR</b></div>
+            </div>
+
+          </div>
+        </section>
+
+        <section class="actions">
+          <button class="act seq" id="goReceive"><div class="ico"><img src="https://img.icons8.com/?size=100&id=7911&format=png&color=98d6ff"></div><div class="txt">Receive</div></button>
+          <button class="act seq" id="goSend"><div class="ico"><img src="https://img.icons8.com/?size=100&id=2837&format=png&color=98d6ff"></div><div class="txt">Send</div></button>
+          <button class="act seq" id="goHistory"><div class="ico"><img src="https://img.icons8.com/?size=100&id=6904&format=png&color=98d6ff"></div><div class="txt">History</div></button>
+          <button class="act seq" id="goWallets2"><div class="ico"><img src="https://img.icons8.com/?size=100&id=37083&format=png&color=98d6ff"></div><div class="txt">Manage</div></button>
+        </section>
+
+
+      </section>
+
+
+      
+      <section class="page" id="page-explore">
+
+
+<div class="exploreGrid" style="margin-top:12px">
+  
+  <button class="btn" id="exDecredinals">Decredinals Website</button>
+  <button class="btn" id="exOfficial">Decred Website</button>
+  <button class="btn" id="exExplorer">Decred Explorer</button>
+
+  
+  <div class="exIcons">
+    <button class="exIconBtn" id="exSite" title="Website" type="button">
+      <img src="https://img.icons8.com/?size=100&id=53372&format=png&color=ffffff" alt="Website">
+    </button>
+    <button class="exIconBtn" id="exX" title="X / Twitter" type="button">
+      <img src="https://img.icons8.com/?size=100&id=fJp7hepMryiw&format=png&color=ffffff" alt="X">
+    </button>
+    <button class="exIconBtn" id="exTg" title="Telegram" type="button">
+      <img src="https://img.icons8.com/?size=100&id=TCnKnYZFoOzM&format=png&color=ffffff" alt="Telegram">
+    </button>
+    <button class="exIconBtn" id="exGh" title="GitHub" type="button">
+      <img src="https://img.icons8.com/?size=100&id=12598&format=png&color=ffffff" alt="GitHub">
+    </button>
+  </div>
+</div>
+
+
+       
+
+      </section>
+
+<section class="page" id="page-decredinals">
+  <div class="phead">
+    <button class="back" data-back>←</button>
+    <div class="ptitle">Decredinals</div>
+    <div class="pspace"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-dtab="insc">Inscriptions</button>
+    <button class="tab" data-dtab="dcr20">DCR-20</button>
+  </div>
+
+  <div class="panel on" id="dec-insc">
+    <div class="tiny">Coming soon</div>
+  </div>
+
+  <div class="panel" id="dec-dcr20">
+    <div class="tiny">Coming soon</div>
+  </div>
+</section>
+
+
+      
+      <section class="page" id="page-settings">
+        <section class="account">
+          <div class="balLabel">SETTINGS</div>
+          
+        </section>
+
+        <div class="row" style="margin-top:12px">
+          <button class="btn" id="setManageWallets">Manage wallets</button>
+</div>
+
+
+ 
+      </section>
+
+      
+      <section class="page" id="page-wallets">
+        <div class="phead">
+          <button class="back" data-back>←</button>
+          <div class="ptitle">Manage wallets</div>
+          <div class="pspace"></div>
+        </div>
+
+        <div class="row">
+          <button class="btn primary" id="goCreate">Create</button>
+          <button class="btn" id="goImport">Import</button>
+          <button class="btn" id="goConnect">Connect</button>
+          <button class="btn danger" id="goDisconnect" hidden>Disconnect</button>
+        </div>
+
+        <div class="label" style="margin-top:14px">Wallets</div>
+        <div class="walletList" id="walletList"></div>
+</section>
+
+      
+      <section class="page" id="page-create">
+        <div class="phead">
+          <button class="back" data-back>←</button>
+          <div class="ptitle">Create wallet</div>
+          <div class="pspace"></div>
+        </div>
+
+        <div class="label">Wallet name</div>
+        <input class="input" id="cName" placeholder="e.g. Main"/>
+
+        <div class="label" style="margin-top:12px">New</div>
+        <button class="btn primary" id="btnNewSeed33">New seed (33 words)</button>
+
+  
+      </section>
+
+      
+      <section class="page" id="page-import">
+        <div class="phead">
+          <button class="back" data-back>←</button>
+          <div class="ptitle">Import wallet</div>
+          <div class="pspace"></div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab on" data-tab="seed">Seed 33</button>
+          <button class="tab" data-tab="wif">WIF</button>
+        </div>
+
+        <div class="panel on" id="imp-seed">
+          <div class="label">Wallet name</div>
+          <input class="input" id="iSeedName" placeholder="e.g. Restored"/>
+
+          <div class="label" style="margin-top:10px">Seed words</div>
+          <textarea class="ta mono" id="iSeedWords" placeholder="paste 33 words"></textarea>
+
+          <button class="btn primary" style="margin-top:12px" id="btnImportSeed33">Import Seed</button>
+        </div>
+
+        <div class="panel" id="imp-wif">
+          <div class="label">Wallet name</div>
+          <input class="input" id="iWifName" placeholder="e.g. Hot"/>
+
+          <div class="label" style="margin-top:10px">WIF</div>
+          <input class="input mono" id="iWif" placeholder="Pm… or 3W…"/>
+
+          <button class="btn primary" style="margin-top:12px" id="btnImportWif">Import WIF</button>
+        </div>
+      </section>
+
+      
+      <section class="page" id="page-details">
+        <div class="phead">
+          <button class="back" data-back>←</button>
+          <div class="ptitle">Wallet details</div>
+          <div class="pspace"></div>
+        </div>
+  <div class="pageScroll">
+        <div class="label">Name</div>
+        <input class="input" id="dName" placeholder="Wallet name"/>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary" id="dSave">Save</button>
+          <button class="btn" id="dUse">Use</button>
+        </div>
+
+        <div class="label" style="margin-top:14px">Address</div>
+        <div class="box mono" id="dAddr">—</div>
+
+        <div class="label" style="margin-top:14px">Backup</div>
+        <button class="btn" id="dBackup">Download backup file</button>
+
+        <div class="label" style="margin-top:14px">Secrets</div>
+        <button class="btn ghost" id="dToggle">Show secrets</button>
+
+        <div id="dSecrets" hidden>
+          <div class="label" style="margin-top:12px">Seed phrase</div>
+          <div class="box mono" id="dSeed">—</div>
+
+          <div class="label" style="margin-top:12px">WIF (Pm)</div>
+          <div class="box mono" id="dWifPm">—</div>
+
+          <div class="label" style="margin-top:12px">WIF (3W)</div>
+          <div class="box mono" id="dWif3W">—</div>
+        </div>
+
+        <div class="label" style="margin-top:14px">Danger zone</div>
+        <button class="btn danger" id="dDelete">Delete wallet</button> </div>
+      </section>
+
+      
+      <section class="page" id="page-receive">
+        <div class="phead">
+          <button class="back" data-back>←</button>
+          <div class="ptitle">Receive</div>
+          <div class="pspace"></div>
+        </div>
+
+        <div class="label">Your address</div>
+<div style="display: flex">
+        <div class="box mono" id="rAddr">—</div>
+        <button class="iconBtn" id="rCopy"><img style="width:25px;"   src="https://img.icons8.com/?size=100&id=AGLXTiVVflkt&format=png&color=98d6ff"></button><br>
+      </div>
+
+<div class="qrWrap">
+  <div id="qrBox" class="qrBox" aria-label="QR code"></div>
+</div>
+
+
+        <div class="tiny" style="text-align:center;margin-top:10px">Scan to receive DCR</div>
+      </section>
+
+<section class="page" id="page-tx">
+  <div class="phead">
+    <button class="back" id="txBack">←</button>
+    <div class="ptitle">Transaction</div>
+    <div class="pspace"></div>
+  </div>
+
+  <div class="txCard">
+    <div class="label">Status</div>
+    <div class="txStatusOk" id="txStatusText">Sent</div>
+
+    <div class="label" style="margin-top:12px">Txid</div>
+    <div class="box mono" id="txIdBox">—</div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="btn primary" id="txExplorerBtn">Explorer</button>
+      <button class="btn" id="txCopyBtn">Copy txid</button>
+    </div>
+  </div>
+</section>
+
+      
+      <section class="page" id="page-send">
+        <div class="phead">
+          <button class="back" data-back>←</button>
+          <div class="ptitle">Send</div>
+          <div class="pspace"></div>
+        </div>
+
+        <div class="label">To</div>
+        <input class="input mono" id="sTo" placeholder="D... address"/>
+
+        <div class="label" style="margin-top:10px">Amount (DCR)</div>
+        <input class="input mono" id="sDcr" placeholder="e.g. 0.25"/>
+
+        <div class="hintRow">
+          <div class="hintLeft">
+            <div class="tiny">≈ <span id="sUsd">$0.00</span></div>
+            <div class="tiny2"><span id="sAtoms">0</span> atoms</div>
+          </div>
+          <button class="btn ghost sm" id="sMax">Max</button>
+        </div>
+
+        
+        <div class="feeRow">
+          <div class="mono">Network fee max</div>
+          <div class="mono" id="sFee">—</div>
+        </div>
+<button class="btn primary" style="margin-top:12px" id="sSend">Send</button>
+      </section>
+
+      
+      <section class="page" id="page-history">
+        <div class="phead">
+          <button class="back" data-back>←</button>
+          <div class="ptitle">History</div>
+          <div class="pspace"></div>
+        </div>
+
+        <div class="row" style="margin-bottom:10px">
+          <button class="btn ghost" id="hReload">Reload</button>
+          <button class="btn ghost" id="hMore">Load more</button>
+        </div>
+
+        <div class="txList" id="txList"></div>
+        <div class="tiny" id="txStatus">—</div>
+      </section>
+
+
+</main>
+
+<footer class="bbar">
+  <div class="bbar-inner">
+  <button class="bbtn active" data-nav="wallet" type="button">
+    <img class="bico" src="https://img.icons8.com/?size=100&id=209&format=png&color=98d6ff" alt="Wallet"/>
+    <span>Wallet</span>
+  </button>
+
+  <button class="bbtn"  id="exDecredinalsPage" type="button">
+    <img class="bico" src="https://img.icons8.com/?size=100&id=tPXOWt6M555g&format=png&color=98d6ff" alt="Decredinals"/>
+    <span>Decredinals</span>
+  </button>
+
+
+  <button class="bbtn soon" data-soon="Soon" type="button">
+    <img class="bico" src="https://img.icons8.com/?size=100&id=wKMlZR7ku5Q3&format=png&color=98d6ff" alt="Inscribe"/>
+    <span>Inscribe</span>
+  </button>
+
+  <button class="bbtn soon" data-soon="Soon" type="button">
+    <img class="bico" src="https://img.icons8.com/?size=100&id=7767&format=png&color=98d6ff" alt="Trade"/>
+    <span>Trade</span>
+  </button>
+  <button class="bbtn" data-nav="explore" type="button">
+    <img class="bico" src="https://img.icons8.com/?size=100&id=9672&format=png&color=98d6ff" alt="Explore"/>
+    <span>Explore</span>
+  </button>
+  <button class="bbtn" data-nav="settings" type="button">
+    <img class="bico" src="https://img.icons8.com/?size=100&id=364&format=png&color=98d6ff" alt="Settings"/>
+    <span>Settings</span>
+  </button></div>
+</footer>
+
+<div class="toast" id="toast" hidden></div>
+
+  </div>
+
+
+<script src="secp256k1.js"></script>
+
+<script src="wasm_exec.js"></script>
+<script>
+const go = new Go();
+let __wasmReady = null;
+
+function initWasm(){
+  if (__wasmReady) return __wasmReady;
+  __wasmReady = (async () => {
+    const res = await fetch("wallet.wasm");
+    const bytes = await res.arrayBuffer();
+    const { instance } = await WebAssembly.instantiate(bytes, go.importObject);
+    go.run(instance);
+
+    if (typeof globalThis.DCRWasmNewSeed33 !== "function") {
+      throw new Error("WASM init failed (DCRWasmNewSeed33 missing)");
+    }
+  })();
+  return __wasmReady;
+}
+
+const $ = (id) => document.getElementById(id);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+const API_DEFAULT = "https://dcr-ext-relay-production.up.railway.app";
+const LS_WALLETS = "wallets";
+const LS_ACTIVE = "activeWalletId";
+const LS_MODE = "accountSource"; // "local" | "ext"
+const LS_API = "dcr_relay_api";
+
+let EXT_SESSION = null; // { address }
+
+function provider() {
+  return window.decred || window.dcrWallet || null;
+}
+
+function getApiBase() {
+  const v = String(localStorage.getItem(LS_API) || API_DEFAULT).replace(/\/$/, "");
+  return v || API_DEFAULT;
+}
+
+async function apiFetch(path, { method = "GET", body } = {}) {
+  const url = getApiBase() + path;
+  const opt = { method, headers: {} };
+  if (body !== undefined) {
+    opt.headers["content-type"] = "application/json";
+    opt.body = JSON.stringify(body);
+  }
+  const res = await fetch(url, opt);
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(j?.error || ("HTTP " + res.status));
+  return j;
+}
+
+function uid() {
+  return "w_" + Math.random().toString(16).slice(2) + Date.now().toString(16);
+}
+
+function loadWalletsLocal() {
+  const wallets = JSON.parse(localStorage.getItem(LS_WALLETS) || "[]");
+  const activeWalletId = String(localStorage.getItem(LS_ACTIVE) || "");
+  return { wallets: Array.isArray(wallets) ? wallets : [], activeWalletId };
+}
+function saveWalletsLocal(wallets, activeWalletId) {
+  localStorage.setItem(LS_WALLETS, JSON.stringify(wallets || []));
+  localStorage.setItem(LS_ACTIVE, String(activeWalletId || ""));
+}
+
+function upsertWalletLocal(wallets, w) {
+  const id = w.id || uid();
+  const clean = {
+    id,
+    label: String(w.label || "").trim().slice(0, 40) || "Wallet",
+    address: String(w.address || ""),
+    wifOfficial: String(w.wifOfficial || ""),
+    wifLegacy: String(w.wifLegacy || ""),
+    seedWords: String(w.seedWords || "")
+  };
+  const idx = wallets.findIndex(x => x.id === id || x.address === clean.address);
+  if (idx >= 0) wallets[idx] = { ...wallets[idx], ...clean };
+  else wallets.unshift(clean);
+  return { wallets, saved: clean };
+}
+
+function getMode() { return (localStorage.getItem(LS_MODE) || "local"); }
+function setMode(m) { localStorage.setItem(LS_MODE, m === "ext" ? "ext" : "local"); }
+
+function getExtWallet() {
+  if (!EXT_SESSION?.address) return null;
+  return {
+    id: "ext",
+    label: "Extension",
+    address: EXT_SESSION.address,
+    wifOfficial: "",
+    wifLegacy: "",
+    seedWords: ""
+  };
+}
+
+async function connectExtension() {
+  const p = provider();
+  if (!p) throw new Error("Extension provider not detected");
+  const info = await p.request({ method: "dcr_requestAccounts" });
+  const address = info?.address || "";
+  if (!address) throw new Error("No address returned");
+  EXT_SESSION = { address };
+  setMode("ext");
+  saveWalletsLocal(loadWalletsLocal().wallets, "ext");
+  return EXT_SESSION;
+}
+
+function disconnectExtensionLocal(){
+  EXT_SESSION = null;
+  try{ localStorage.removeItem(LS_EXT_ADDR); }catch{}
+  // Switch back to local mode and pick a sane active wallet (first local wallet or none)
+  setMode("local");
+  const st = loadWalletsLocal();
+  const first = st.wallets?.[0]?.id || "";
+  saveWalletsLocal(st.wallets || [], first);
+}
+
+async function validateExtensionSession(){
+  const wantExt = (getMode() === "ext") || (String(localStorage.getItem(LS_ACTIVE) || "") === "ext");
+  if (!wantExt) return false;
+
+  const p = provider();
+  if (!p){
+    disconnectExtensionLocal();
+    return false;
+  }
+
+  // Try to refresh address from extension. If it fails or returns empty -> disconnect in web UI too.
+  try{
+    const info = await p.request({ method: "dcr_requestAccounts" });
+    const address = String(info?.address || "").trim();
+    if (!address){
+      disconnectExtensionLocal();
+      return false;
+    }
+    EXT_SESSION = { address };
+    localStorage.setItem(LS_EXT_ADDR, address);
+    setMode("ext");
+    saveWalletsLocal(loadWalletsLocal().wallets, "ext");
+    return true;
+  }catch(e){
+    disconnectExtensionLocal();
+    return false;
+  }
+}
+
+
+async function msg(type, payload = {}) {
+  try {
+    const st = loadWalletsLocal();
+    const extW = getExtWallet();
+    const wallets = extW
+      ? [extW, ...st.wallets.filter(w => w.id !== "ext")]
+      : st.wallets.filter(w => w.id !== "ext");
+
+    const activeWalletId = st.activeWalletId || (wallets[0]?.id || "");
+    const active = wallets.find(w => w.id === activeWalletId);
+
+    const needAddress = () => {
+      const a = active?.address || "";
+      if (!a) throw new Error("No active wallet");
+      return a;
+    };
+
+    if (type === "getWallets") return { ok: true, wallets, activeWalletId };
+
+    if (type === "setActiveWallet") {
+      const id = String(payload.id || "");
+      if (!wallets.some(w => w.id === id)) throw new Error("Wallet not found");
+      saveWalletsLocal(st.wallets, id);
+      if (id !== "ext") setMode("local");
+      return { ok: true };
+    }
+
+    if (type === "deleteWallet") {
+      const id = String(payload.id || "");
+      if (id === "ext") throw new Error("Can't delete extension wallet");
+      const next = st.wallets.filter(w => w.id !== id);
+      const nextActive = (st.activeWalletId === id) ? (next[0]?.id || "") : st.activeWalletId;
+      saveWalletsLocal(next, nextActive);
+      return { ok: true };
+    }
+
+    if (type === "updateWallet") {
+      const id = String(payload.id || "");
+      if (id === "ext") throw new Error("Can't edit extension wallet");
+
+      const label = String(payload?.label ?? payload?.patch?.label ?? "").trim();
+
+      const w = st.wallets.find(x => x.id === id);
+      if (!w) throw new Error("Wallet not found");
+      const { wallets: nw } = upsertWalletLocal([...st.wallets], { ...w, label: label || w.label });
+      saveWalletsLocal(nw, st.activeWalletId);
+      return { ok: true };
+    }
+
+   if (type === "newSeed") {
+  await initWasm();
+
+  const label = String(payload.label || "").trim();
+  const j = globalThis.DCRWasmNewSeed33();
+  if (!j?.ok) throw new Error(j?.error || "wasm newSeed failed");
+
+  const { wallets: nw, saved } = upsertWalletLocal([...st.wallets], {
+    label,
+    address: j.address,
+    wifOfficial: j.wifOfficial,
+    wifLegacy: j.wifLegacy,
+    seedWords: j.seedWords || ""
+  });
+  saveWalletsLocal(nw, saved.id);
+  setMode("local");
+  return { ok: true, wallet: saved };
+}
+if (type === "importSeed") {
+  await initWasm();
+
+  const label = String(payload.label || "").trim();
+  const seedWords = String(payload.seedWords ?? payload.words ?? "").trim().replace(/\s+/g, " ");
+  if (!seedWords) throw new Error("Seed is empty");
+
+  const j = globalThis.DCRWasmFromSeed33(seedWords);
+  if (!j?.ok) throw new Error(j?.error || "wasm from-seed failed");
+
+  const { wallets: nw, saved } = upsertWalletLocal([...st.wallets], {
+    label,
+    address: j.address,
+    wifOfficial: j.wifOfficial,
+    wifLegacy: j.wifLegacy,
+    seedWords
+  });
+  saveWalletsLocal(nw, saved.id);
+  setMode("local");
+  return { ok: true, wallet: saved };
+}
+if (type === "importWif") {
+  await initWasm();
+
+  const label = String(payload.label || "").trim();
+  const wif = String(payload.wif || "").trim();
+  if (!wif) throw new Error("WIF is empty");
+
+  const j = globalThis.DCRWasmFromWIF(wif);
+  if (!j?.ok) throw new Error(j?.error || "wasm from-wif failed");
+
+  const { wallets: nw, saved } = upsertWalletLocal([...st.wallets], {
+    label,
+    address: j.address,
+    wifOfficial: j.wifOfficial,
+    wifLegacy: j.wifLegacy,
+    seedWords: ""
+  });
+  saveWalletsLocal(nw, saved.id);
+  setMode("local");
+  return { ok: true, wallet: saved };
+}
+
+    if (type === "getPrice") {
+      const url = "https://api.coingecko.com/api/v3/simple/price?ids=decred&vs_currencies=usd";
+      const r = await fetch(url);
+      const j = await r.json();
+      const usd = j?.decred?.usd;
+      if (typeof usd !== "number") throw new Error("Price unavailable");
+      return { ok: true, usd };
+    }
+
+    if (type === "getBalance") {
+      const addr = needAddress();
+      const utx = await apiFetch("/api/utxos/" + encodeURIComponent(addr));
+
+      const utxos = Array.isArray(utx.utxos) ? utx.utxos : [];
+      const totalAtoms = Number(utx.balanceAtoms || 0);
+
+      let pendingAtoms = 0;
+
+      for (const u of utxos) {
+        const sat = Number(u.satoshis || 0);
+
+        const hasConf = Object.prototype.hasOwnProperty.call(u, "confirmations");
+        const conf = hasConf ? Number(u.confirmations || 0) : 0;
+
+        if (!hasConf || conf === 0) pendingAtoms += sat;
+      }
+
+      const availableAtoms = Math.max(0, totalAtoms - pendingAtoms);
+
+      return {
+        ok: true,
+        address: addr,
+        atoms: totalAtoms,
+        availableAtoms,
+        unavailableAtoms: pendingAtoms,
+        utxoCount: utxos.length
+      };
+    }
+
+    if (type === "getTxs") {
+      const addr = needAddress();
+      const skip = Number(payload.skip || 0);
+      const count = Number(payload.count || 20);
+      const j = await apiFetch(`/api/txs/${encodeURIComponent(addr)}?skip=${skip}&count=${count}`);
+      if (j?.ok === false) throw new Error(j.error || "txs failed");
+      return { ok: true, data: j };
+    }
+
+    if (type === "buildTx") {
+      const addr = needAddress();
+      const to = String(payload.to || "").trim();
+      const atoms = Number(payload.atoms || 0);
+      const j = await apiFetch("/api/tx/build", { method: "POST", body: { from: addr, to, atoms, minConf: 1 } });
+      if (j?.ok === false) throw new Error(j.error || "tx build failed");
+      return { ok: true, data: j };
+    }
+
+    if (type === "sighashTx") {
+      const body = payload.body || payload;
+      const j = await apiFetch("/api/tx/sighash", { method: "POST", body });
+      if (j?.ok === false) throw new Error(j.error || "sighash failed");
+      return { ok: true, data: j };
+    }
+
+    if (type === "finalizeTx") {
+      const body = payload.body || payload;
+      const j = await apiFetch("/api/tx/finalize", { method: "POST", body });
+      if (j?.ok === false) throw new Error(j.error || "finalize failed");
+      return { ok: true, data: j };
+    }
+
+    if (type === "broadcastTx") {
+      const rawtx = String(payload.rawtx || "").trim();
+      const j = await apiFetch("/api/tx/broadcast", { method: "POST", body: { rawtx } });
+      if (j?.ok === false) throw new Error(j.error || "broadcast failed");
+      return { ok: true, data: j };
+    }
+
+    if (type === "GET_CONNECTED_SITES") return { ok: true, sites: {} };
+    if (type === "DISCONNECT_SITE") return { ok: true };
+
+    throw new Error("Unknown msg type: " + type);
+  } catch (e) {
+    return { ok: false, error: e.message || String(e) };
+  }
+}
+
+const ATOMS = 1e8;
+
+function toast(t) {
+  const el = $("toast");
+  if (!el) return;
+
+  el.textContent = t;
+  el.hidden = false;
+
+  el.classList.remove("show");
+  void el.offsetWidth; // force reflow
+  el.classList.add("show");
+
+  clearTimeout(window.__to);
+  window.__to = setTimeout(() => {
+    el.classList.remove("show");
+    window.__to2 = setTimeout(() => {
+      el.hidden = true;
+    }, 300);
+  }, 1800);
+}
+
+
+function short(s) {
+  s = String(s || "");
+  if (!s) return "—";
+  return s.slice(0, 6) + "…" + s.slice(-6);
+}
+function fmt8(n) { return Number(n || 0).toFixed(8); }
+function usd(n) {
+  const x = Number(n || 0);
+  return x.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 });
+}
+function parseDcrInput(str) {
+  const s = String(str || "").trim().replace(",", ".");
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+}
+function dcrToAtoms(dcr) { return Math.max(0, Math.round(Number(dcr || 0) * ATOMS)); }
+function atomsToDcr(at) { return Number(at || 0) / ATOMS; }
+
+function escapeHtml(s) {
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function syncChevron() {
+  const chev = document.querySelector("#btnOpenWallets .chev");
+  if (!chev) return;
+  const open = document.getElementById("page-wallets")?.classList.contains("on");
+  chev.textContent = open ? "▴" : "▾";
+}
+
+function syncBottomNav() {
+  const cur = document.querySelector(".page.on")?.id || "page-home";
+  let tab = "wallet";
+  if (cur === "page-explore") tab = "explore";
+  else if (cur === "page-settings") tab = "settings";
+  else tab = "wallet";
+
+  $$(".bbar .bbtn").forEach(b => b.classList.remove("active"));
+  $$(`.bbar .bbtn[data-nav="${tab}"]`).forEach(b => b.classList.add("active"));
+}
+
+function showPageCore(id) {
+  $$(".page").forEach(p => p.classList.remove("on"));
+  const el = $(id);
+  if (el) el.classList.add("on");
+  syncChevron();
+  syncBottomNav();
+}
+
+let priceUsd = 0;
+let wallets = [];
+let activeId = "";
+let activeWallet = null;
+let lastBal = null;
+
+let detailsId = "";
+let txSkip = 0;
+const TX_PAGE = 20;
+
+async function refreshWallets() {
+  const st = await msg("getWallets");
+  wallets = st?.wallets || [];
+  activeId = st?.activeWalletId || "";
+  activeWallet = wallets.find(w => w.id === activeId) || null;
+
+  if ($("activeLabel")) $("activeLabel").textContent = activeWallet?.label || "Wallet";
+  if ($("activeShort")) $("activeShort").textContent = activeWallet?.address ? short(activeWallet.address) : "No wallet";
+  if ($("addr")) $("addr").textContent = activeWallet?.address || "—";
+  if ($("rAddr")) $("rAddr").textContent = activeWallet?.address || "—";
+}
+
+async function refreshPrice() {
+  const r = await msg("getPrice");
+  if (r?.ok) priceUsd = r.usd || 0;
+}
+
+async function syncBalance() {
+  const r = await msg("getBalance");
+
+  const pw = $("pendingWrap");
+  if (pw) pw.style.display = "";
+
+  const pd = $("pendingDcr");
+
+  if (!r?.ok) {
+    lastBal = null;
+    if ($("balDcr")) $("balDcr").textContent = "0.00000000";
+    if ($("balUsd")) $("balUsd").textContent = "$0.00";
+    if ($("balAtoms")) $("balAtoms").textContent = "—";
+    if ($("availDcr")) $("availDcr").textContent = "0.00000000";
+    if (pd) pd.textContent = "0.00000000";
+    return;
+  }
+
+  lastBal = r;
+
+  const totalD = atomsToDcr(r.atoms);
+  if ($("balDcr")) $("balDcr").textContent = fmt8(totalD);
+  if ($("balUsd")) $("balUsd").textContent = usd(totalD * priceUsd);
+  if ($("balAtoms")) $("balAtoms").textContent = `${r.atoms} atoms • UTXOs: ${r.utxoCount}`;
+
+  if ($("availDcr")) $("availDcr").textContent = fmt8(atomsToDcr(r.availableAtoms));
+  if (pd) pd.textContent = fmt8(atomsToDcr(r.unavailableAtoms || 0));
+}
+
+function openExplorerTx(txid) {
+  const url = "https://dcrdata.decred.org/tx/" + encodeURIComponent(txid);
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
+let lastTxid = "";
+function showTxPage(txid) {
+  lastTxid = txid;
+  if ($("txIdBox")) $("txIdBox").textContent = txid || "—";
+  showPage("page-tx");
+}
+
+$("txBack") && ($("txBack").onclick = () => showPage("page-home"));
+$("txExplorerBtn") && ($("txExplorerBtn").onclick = () => {
+  if (!lastTxid) return toast("No txid");
+  openExplorerTx(lastTxid);
+});
+$("txCopyBtn") && ($("txCopyBtn").onclick = async () => {
+  if (!lastTxid) return toast("No txid");
+  await navigator.clipboard.writeText(lastTxid);
+  toast("Txid copied");
+});
+
+function renderWalletList() {
+  const list = $("walletList");
+  if (!list) return;
+  list.innerHTML = "";
+
+  const bCon = $("goConnect");
+  const bDis = $("goDisconnect");
+  const extOn = (getMode() === "ext") && !!EXT_SESSION?.address;
+  if (bCon) bCon.hidden = extOn;
+  if (bDis) bDis.hidden = !extOn;
+
+  if (!wallets.length) {
+    const div = document.createElement("div");
+    div.className = "wRow";
+    div.style.cursor = "default";
+    div.innerHTML = `
+      <div class="wMeta">
+        <div class="wName">No wallets</div>
+        <div class="wAddr mono">Create or import to start.</div>
+      </div>`;
+    list.appendChild(div);
+    return;
+  }
+
+  for (const w of wallets) {
+    const row = document.createElement("div");
+    row.className = "wRow";
+    row.innerHTML = `
+      <div class="wMeta">
+        <div class="wName">${escapeHtml(w.label || "Wallet")}${w.id === activeId ? " ✓" : ""}</div>
+        <div class="wAddr mono">${escapeHtml(short(w.address))}</div>
+      </div>
+      <div class="wBtns">
+        <button class="iconBtn2" data-use title="Set">Set</button>
+        <button class="iconBtn2" data-gear title="Manage">⚙</button>
+      </div>`;
+
+    row.querySelector("[data-use]").onclick = async (e) => {
+      e.stopPropagation();
+      await msg("setActiveWallet", { id: w.id });
+      await boot();
+      showPage("page-home");
+      toast("Active wallet set");
+    };
+
+    row.querySelector("[data-gear]").onclick = (e) => {
+      e.stopPropagation();
+      openDetails(w.id);
+    };
+
+    row.onclick = async () => {
+      await msg("setActiveWallet", { id: w.id });
+      await boot();
+      showPage("page-home");
+      toast("Active wallet set");
+    };
+
+    list.appendChild(row);
+  }
+}
+
+function openDetails(id) {
+  detailsId = id;
+  const w = wallets.find(x => x.id === id);
+  if (!w) return;
+
+  if ($("dName")) $("dName").value = w.label || "";
+  if ($("dAddr")) $("dAddr").textContent = w.address || "—";
+  if ($("dSeed")) $("dSeed").textContent = w.seedWords || "—";
+  if ($("dWifPm")) $("dWifPm").textContent = w.wifOfficial || "—";
+  if ($("dWif3W")) $("dWif3W").textContent = w.wifLegacy || "—";
+
+  if ($("dSecrets")) $("dSecrets").hidden = true;
+  if ($("dToggle")) $("dToggle").textContent = "Show secrets";
+
+  showPage("page-details");
+}
+
+let __feeTimer = 0;
+let __feeReqId = 0;
+
+function setFeeText(t) {
+  const el = $("sFee");
+  if (el) el.textContent = t;
+}
+function updateSendPreview() {
+  if (!$("sDcr")) return;
+  const dcr = parseDcrInput($("sDcr").value);
+  const atoms = dcrToAtoms(dcr);
+  if ($("sAtoms")) $("sAtoms").textContent = String(atoms);
+  if ($("sUsd")) $("sUsd").textContent = usd(dcr * priceUsd);
+}
+async function estimateSendFeeDebounced() {
+  clearTimeout(__feeTimer);
+  __feeTimer = setTimeout(async () => {
+    try {
+      if (!document.getElementById("page-send")?.classList.contains("on")) return;
+      if (!activeWallet?.address) return setFeeText("—");
+
+      const to = ($("sTo")?.value || "").trim();
+      const d = parseDcrInput($("sDcr")?.value || "");
+      const atoms = dcrToAtoms(d);
+
+      if (!to || !to.startsWith("D")) return setFeeText("—");
+      if (!atoms || atoms <= 0) return setFeeText("—");
+
+      const myId = ++__feeReqId;
+      setFeeText("Estimating…");
+
+      const b = await msg("buildTx", { to, atoms });
+      if (myId !== __feeReqId) return;
+
+      if (!b?.ok) return setFeeText("—");
+
+      const feeAtoms = Number(b?.data?.feeAtoms ?? b?.data?.FeeAtoms ?? b?.data?.fee ?? 0) || 0;
+      setFeeText(feeAtoms ? `${fmt8(atomsToDcr(feeAtoms))} DCR (${feeAtoms} atoms)` : "—");
+    } catch {
+      setFeeText("—");
+    }
+  }, 450);
+}
+
+$("sDcr") && $("sDcr").addEventListener("input", () => {
+  updateSendPreview();
+  estimateSendFeeDebounced();
+});
+$("sTo") && $("sTo").addEventListener("input", estimateSendFeeDebounced);
+
+function txTime(tx) {
+  const t = tx?.time || tx?.blocktime || tx?.blockTime || 0;
+  if (!t) return "—";
+  try { return new Date(Number(t) * 1000).toLocaleString(); } catch { return "—"; }
+}
+function txid(tx) { return tx?.txid || tx?.hash || tx?.id || ""; }
+function addrInVout(vout, myAddr) {
+  const addrs = vout?.scriptPubKey?.addresses;
+  return Array.isArray(addrs) && addrs.includes(myAddr);
+}
+function sumNetDcrForAddr(tx, myAddr) {
+  let inDcr = 0;
+  let outDcr = 0;
+  if (Array.isArray(tx?.vout)) {
+    for (const o of tx.vout) {
+      if (addrInVout(o, myAddr)) inDcr += Number(o.value || 0);
+    }
+  }
+  if (Array.isArray(tx?.vin)) {
+    for (const i of tx.vin) {
+      if ((i?.addr || "") === myAddr) outDcr += Number(i.value || 0);
+    }
+  }
+  return inDcr - outDcr;
+}
+function fmtSignedDcr(net) {
+  const sign = net >= 0 ? "+" : "−";
+  return `${sign}${Math.abs(net).toFixed(8)} DCR`;
+}
+function netClass(net) {
+  if (net > 0) return "net plus";
+  if (net < 0) return "net minus";
+  return "net zero";
+}
+
+async function loadTxs(reset = false) {
+  const txListEl = $("txList");
+  const txStatusEl = $("txStatus");
+  if (!txListEl || !txStatusEl) return;
+
+  if (reset) {
+    txSkip = 0;
+    txListEl.innerHTML = "";
+  }
+  txStatusEl.textContent = "Loading…";
+
+  const r = await msg("getTxs", { skip: txSkip, count: TX_PAGE });
+  if (!r?.ok) {
+    txStatusEl.textContent = "Failed: " + (r.error || "unknown");
+    return;
+  }
+
+  const items =
+    (Array.isArray(r?.data?.txs) && r.data.txs) ||
+    (Array.isArray(r?.data?.items) && r.data.items) ||
+    (Array.isArray(r?.data?.raw?.txs) && r.data.raw.txs) ||
+    [];
+
+  if (!Array.isArray(items) || !items.length) {
+    txStatusEl.textContent = reset ? "No transactions." : "No more transactions.";
+    return;
+  }
+
+  for (const tx of items) {
+    const id = txid(tx);
+    const conf = tx.confirmations ?? 0;
+    const time = txTime(tx);
+    const myAddr = activeWallet?.address || "";
+    const net = myAddr ? sumNetDcrForAddr(tx, myAddr) : 0;
+
+    const div = document.createElement("div");
+    div.className = "txRow";
+    div.innerHTML = `
+      <div class="txTop">
+        <div class="mono txid">${escapeHtml(short(id))}</div>
+        <div class="${netClass(net)}">${escapeHtml(fmtSignedDcr(net))}</div>
+      </div>
+      <div class="txBot">
+        <div class="txTime">${escapeHtml(time)}</div>
+        <div class="txRight">
+          <div class="txConf">${escapeHtml(String(conf))} confirmations</div>
+          <button class="txBtn" data-open>Explorer</button>
+        </div>
+      </div>`;
+    div.querySelector("[data-open]").onclick = () => openExplorerTx(id);
+
+    txListEl.appendChild(div);
+  }
+
+  txSkip += items.length;
+  txStatusEl.textContent = `Loaded ${txSkip}`;
+}
+
+function downloadJson(filename, obj) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 3000);
+}
+
+$("btnOpenWallets") && ($("btnOpenWallets").onclick = async () => {
+  const isWalletsOpen = document.getElementById("page-wallets")?.classList.contains("on");
+  if (isWalletsOpen) {
+    showPage("page-home");
+    return;
+  }
+  await refreshWallets();
+  renderWalletList();
+  showPage("page-wallets");
+});
+
+$("goWallets2") && ($("goWallets2").onclick = $("btnOpenWallets")?.onclick);
+
+$$('.bbar .bbtn[data-nav]').forEach(btn => {
+  btn.onclick = () => {
+    const tab = btn.getAttribute("data-nav");
+    if (tab === "wallet") return showPage("page-home");
+    if (tab === "explore") return showPage("page-explore");
+    if (tab === "settings") return showPage("page-settings");
+  };
+});
+$$('.bbar .bbtn.soon').forEach(btn => {
+  btn.onclick = (e) => {
+    e.preventDefault();
+    toast(btn.getAttribute("data-soon") || "Soon");
+  };
+});
+
+$("exOfficial") && ($("exOfficial").onclick = () => window.open("https://decred.org", "_blank", "noopener,noreferrer"));
+$("exExplorer") && ($("exExplorer").onclick = () => window.open("https://dcrdata.decred.org", "_blank", "noopener,noreferrer"));
+
+$("setManageWallets") && ($("setManageWallets").onclick = async () => {
+  await refreshWallets();
+  renderWalletList();
+  showPage("page-wallets");
+});
+$("setConnectedSites") && ($("setConnectedSites").onclick = async () => {
+  showPage("page-sites");
+  if (typeof renderConnectedSites === "function") await renderConnectedSites();
+});
+
+$$("[data-back]").forEach(b => b.onclick = () => showPage("page-home"));
+
+$("btnCopyAddr") && ($("btnCopyAddr").onclick = async () => {
+  const a = ($("addr")?.textContent || "").trim();
+  if (!a || a === "—") return;
+  await navigator.clipboard.writeText(a);
+  toast("Copied");
+});
+
+$("btnSync") && ($("btnSync").onclick = async () => {
+  await refreshPrice();
+  await syncBalance();
+  toast("Synced");
+});
+
+$("goReceive") && ($("goReceive").onclick = () => { showPage("page-receive"); updateReceiveQR(); });
+
+$("rCopy") && ($("rCopy").onclick = async () => {
+  const a = ($("rAddr")?.textContent || "").trim();
+  if (!a || a === "—") return;
+  await navigator.clipboard.writeText(a);
+  toast("Copied");
+});
+
+$("goSend") && ($("goSend").onclick = () => {
+  showPage("page-send");
+  setFeeText("—");
+  updateSendPreview();
+  estimateSendFeeDebounced();
+});
+
+$("sMax") && ($("sMax").onclick = () => {
+  const atoms = lastBal?.availableAtoms || 0;
+  const d = atomsToDcr(atoms);
+  if ($("sDcr")) $("sDcr").value = String(d.toFixed(8));
+  updateSendPreview();
+  estimateSendFeeDebounced();
+});
+
+$("sSend") && ($("sSend").onclick = async () => {
+  try {
+    if (!activeWallet?.address) return toast("No active wallet");
+
+    if (activeWallet?.id === "ext") {
+      const p = provider();
+      if (!p) return toast("Provider not detected");
+
+      const to = ($("sTo")?.value || "").trim();
+      const d = parseDcrInput($("sDcr")?.value || "");
+
+      if (!to) return toast("Recipient required");
+      if (!Number.isFinite(d) || d <= 0) return toast("Enter amount");
+
+      toast("Confirm in extension…");
+      const res = await p.request({ method: "dcr_sendTransaction", params: { to, amountDcr: d } });
+      const txid = res?.txid || "";
+
+      await syncBalance();
+
+      if ($("sTo")) $("sTo").value = "";
+      if ($("sDcr")) $("sDcr").value = "";
+      updateSendPreview();
+      setFeeText("—");
+
+      toast("Transaction sent ✅");
+      if (txid) showTxPage(txid);
+      else showPage("page-home");
+      return;
+    }
+
+    const to = ($("sTo")?.value || "").trim();
+    const d = parseDcrInput($("sDcr")?.value || "");
+    const atoms = dcrToAtoms(d);
+
+    if (!to) return toast("Recipient required");
+    if (!atoms || atoms <= 0) return toast("Amount required");
+
+    if (!window.secp) return toast("Missing secp256k1.js");
+
+    const wif = (activeWallet.wifOfficial || activeWallet.wifLegacy || "").trim();
+    if (!wif) return toast("No WIF stored in wallet");
+
+    const priv32 = window.secp.decodeWifToPriv32(wif);
+    const pub33 = window.secp.getPublicKey(priv32, true);
+
+    const b = await msg("buildTx", { to, atoms });
+    if (!b?.ok) return toast("Build failed: " + (b.error || "error"));
+
+    const unsignedTxHex = b.data.unsignedTxHex;
+    const inputs = b.data.inputs || [];
+
+    const feeAtoms = Number(b?.data?.feeAtoms ?? b?.data?.FeeAtoms ?? b?.data?.fee ?? 0) || 0;
+    setFeeText(
+      feeAtoms ? `${fmt8(atomsToDcr(feeAtoms))} DCR (${feeAtoms} atoms)` : "—"
+    );
+
+    const sh = await msg("sighashTx", { body: { unsignedTxHex, inputs } });
+    if (!sh?.ok) return toast("Sighash failed: " + (sh.error || "error"));
+
+    const sighashes = sh.data.sighashes || [];
+    if (!Array.isArray(sighashes) || sighashes.length !== inputs.length) {
+      return toast("Bad sighash response");
+    }
+
+    const sigs = [];
+    for (let i = 0; i < sighashes.length; i++) {
+      const hhex = String(sighashes[i] || "").trim();
+      if (hhex.length !== 64) return toast("Bad sighash hex");
+
+      const h = new Uint8Array(32);
+      for (let k = 0; k < 32; k++) h[k] = parseInt(hhex.slice(k * 2, k * 2 + 2), 16);
+
+      const der = window.secp.signDer(h, priv32);
+      sigs.push({
+        index: i,
+        sigDerHex: Array.from(der).map(x => x.toString(16).padStart(2, "0")).join(""),
+        pubkeyHex: Array.from(pub33).map(x => x.toString(16).padStart(2, "0")).join("")
+      });
+    }
+
+    const fin = await msg("finalizeTx", { body: { unsignedTxHex, sigs } });
+    if (!fin?.ok) return toast("Finalize failed: " + (fin.error || "error"));
+
+    const rawTxHex = fin.data.rawTxHex;
+    if (!rawTxHex) return toast("No rawTxHex");
+
+    const br = await msg("broadcastTx", { rawtx: rawTxHex });
+    if (!br?.ok) return toast("Broadcast failed: " + (br.error || "error"));
+
+    if ($("sTo")) $("sTo").value = "";
+    if ($("sDcr")) $("sDcr").value = "";
+    updateSendPreview();
+
+    await boot();
+
+    const txid2 = br.data?.txid || "";
+    if (txid2) showTxPage(txid2);
+    else showPage("page-home");
+
+    toast(txid2 ? "Transaction sent" : "Sent");
+  } catch (e) {
+    toast(String(e?.message || e));
+  }
+});
+
+$("goHistory") && ($("goHistory").onclick = async () => {
+  showPage("page-history");
+  await loadTxs(true);
+});
+$("hReload") && ($("hReload").onclick = () => loadTxs(true));
+$("hMore") && ($("hMore").onclick = () => loadTxs(false));
+
+$("goCreate") && ($("goCreate").onclick = () => showPage("page-create"));
+$("goImport") && ($("goImport").onclick = () => showPage("page-import"));
+
+$$(".tab").forEach(t => {
+  t.onclick = () => {
+    $$(".tab").forEach(x => x.classList.remove("on"));
+    t.classList.add("on");
+    const k = t.dataset.tab;
+    $("imp-seed") && $("imp-seed").classList.toggle("on", k === "seed");
+    $("imp-wif") && $("imp-wif").classList.toggle("on", k === "wif");
+  };
+});
+
+$("btnNewSeed33") && ($("btnNewSeed33").onclick = async () => {
+  const label = ($("cName")?.value || "").trim();
+  const r = await msg("newSeed", { label });
+  if (!r?.ok) return toast("Error: " + (r.error || "failed"));
+  if ($("cName")) $("cName").value = "";
+  await boot();
+  showPage("page-wallets");
+  toast("Created");
+});
+
+$("btnImportSeed33") && ($("btnImportSeed33").onclick = async () => {
+  const label = ($("iSeedName")?.value || "").trim();
+  const words = ($("iSeedWords")?.value || "").trim().replace(/\s+/g, " ");
+  const r = await msg("importSeed", { label, words }); // ✅ supported now
+  if (!r?.ok) return toast("Error: " + (r.error || "failed"));
+  if ($("iSeedName")) $("iSeedName").value = "";
+  if ($("iSeedWords")) $("iSeedWords").value = "";
+  await boot();
+  showPage("page-wallets");
+  toast("Imported");
+});
+
+$("btnImportWif") && ($("btnImportWif").onclick = async () => {
+  const label = ($("iWifName")?.value || "").trim();
+  const wif = ($("iWif")?.value || "").trim();
+  const r = await msg("importWif", { label, wif });
+  if (!r?.ok) return toast("Error: " + (r.error || "failed"));
+  if ($("iWifName")) $("iWifName").value = "";
+  if ($("iWif")) $("iWif").value = "";
+  await boot();
+  showPage("page-wallets");
+  toast("Imported");
+});
+
+$("dToggle") && ($("dToggle").onclick = () => {
+  const sec = $("dSecrets");
+  if (!sec) return;
+  const on = sec.hidden;
+  sec.hidden = !on;
+  if ($("dToggle")) $("dToggle").textContent = on ? "Hide secrets" : "Show secrets";
+});
+
+$("dSave") && ($("dSave").onclick = async () => {
+  const name = ($("dName")?.value || "").trim().slice(0, 40) || "Wallet";
+  const r = await msg("updateWallet", { id: detailsId, patch: { label: name } }); // ✅ supported now
+  if (!r?.ok) return toast("Error: " + (r.error || "failed"));
+  await boot();
+  toast("Saved");
+});
+
+$("dUse") && ($("dUse").onclick = async () => {
+  const r = await msg("setActiveWallet", { id: detailsId });
+  if (!r?.ok) return toast("Error: " + (r.error || "failed"));
+  await boot();
+  showPage("page-home");
+  toast("Active wallet set");
+});
+
+$("dBackup") && ($("dBackup").onclick = async () => {
+  const w = wallets.find(x => x.id === detailsId);
+  if (!w) return;
+  const fname = `dcr-wallet-${(w.label || "wallet").replace(/[^a-z0-9_-]+/gi, "_").toLowerCase()}.json`;
+  downloadJson(fname, w);
+  toast("Backup downloaded");
+});
+
+$("dDelete") && ($("dDelete").onclick = async () => {
+  const btn = $("dDelete");
+  if (!btn) return;
+
+  if (btn.dataset.arm !== "1") {
+    btn.dataset.arm = "1";
+    btn.textContent = "Tap again to confirm delete";
+    setTimeout(() => {
+      btn.dataset.arm = "0";
+      btn.textContent = "Delete wallet";
+    }, 2200);
+    return;
+  }
+
+  const r = await msg("deleteWallet", { id: detailsId });
+  if (!r?.ok) return toast("Error: " + (r.error || "failed"));
+  await boot();
+  showPage("page-wallets");
+  toast("Deleted");
+});
+
+async function renderConnectedSites() {
+  const r = await msg("GET_CONNECTED_SITES");
+  const list = $("sitesList");
+  if (!list) return;
+  list.innerHTML = "";
+  if (!r?.ok) {
+    list.innerHTML = `<div class="wRow"><div class="wMeta"><div class="wName">Error</div><div class="wAddr mono">${escapeHtml(r?.error || "")}</div></div></div>`;
+    return;
+  }
+  const sites = r.sites || {};
+  const keys = Object.keys(sites);
+  if (!keys.length) {
+    list.innerHTML = `<div class="wRow" style="cursor:default"><div class="wMeta"><div class="wName">No connected sites</div><div class="wAddr mono">—</div></div></div>`;
+    return;
+  }
+
+  keys.sort((a, b) => (sites[b]?.lastUsed || 0) - (sites[a]?.lastUsed || 0));
+
+  for (const origin of keys) {
+    const row = document.createElement("div");
+    row.className = "wRow";
+    row.style.cursor = "default";
+    const last = sites[origin]?.lastUsed ? new Date(sites[origin].lastUsed).toLocaleString() : "—";
+    row.innerHTML = `
+      <div class="wMeta">
+        <div class="wName">${escapeHtml(origin)}</div>
+        <div class="wAddr mono">Last used: ${escapeHtml(last)}</div>
+      </div>
+      <div class="wBtns">
+        <button class="iconBtn2" data-dis title="Disconnect">⨯</button>
+      </div>`;
+    row.querySelector("[data-dis]").onclick = async () => {
+      await msg("DISCONNECT_SITE", { origin });
+      await renderConnectedSites();
+      toast("Disconnected");
+    };
+    list.appendChild(row);
+  }
+}
+
+$("goSites") && ($("goSites").onclick = async () => {
+  showPage("page-sites");
+  await renderConnectedSites();
+});
+
+async function boot() {
+  await refreshWallets();
+  await refreshPrice();
+  await syncBalance();
+  renderWalletList();
+  updateSendPreview();
+}
+
+(async () => {
+  try {
+    await boot();
+    showPage("page-home");
+  } catch (e) {
+    console.error(e);
+    showPage("page-home");
+    toast("Init error");
+  }
+})();
+(function initNetSelector(){
+  const btn = document.getElementById("netBtn");
+  const menu = document.getElementById("netMenu");
+  const wrap = document.getElementById("netSel");
+
+  if (!btn || !menu || !wrap) return;
+
+  const close = () => {
+    menu.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+  };
+  const open = () => {
+    menu.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+  };
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (menu.hidden) open(); else close();
+  });
+
+  document.addEventListener("click", () => close());
+
+  menu.addEventListener("click", (e) => e.stopPropagation());
+
+  menu.querySelectorAll(".netItem[disabled]").forEach(x => {
+    x.addEventListener("click", () => toast("Coming soon"));
+  });
+})();
+
+document.getElementById("exDecredinals") &&
+  (document.getElementById("exDecredinals").onclick = () =>
+    window.open("https://decredinals.com", "_blank", "noopener,noreferrer")
+  );
+
+document.getElementById("exSite") &&
+  (document.getElementById("exSite").onclick = () =>
+    window.open("https://decredinals.com", "_blank", "noopener,noreferrer")
+  );
+
+document.getElementById("exX") &&
+  (document.getElementById("exX").onclick = () =>
+    window.open("https://x.com/decredinals", "_blank", "noopener,noreferrer")
+  );
+
+document.getElementById("exTg") &&
+  (document.getElementById("exTg").onclick = () =>
+    window.open("https://t.me/decredinals", "_blank", "noopener,noreferrer")
+  );
+
+document.getElementById("exGh") &&
+  (document.getElementById("exGh").onclick = () =>
+    window.open("https://github.com/decredinals", "_blank", "noopener,noreferrer")
+  );
+
+function updateReceiveQR() {
+  const box = document.getElementById("qrBox");
+  if (!box) return;
+
+  const addr = (activeWallet?.address || "").trim();
+  box.innerHTML = "";
+  if (!addr) return;
+
+  const size = 260;
+  const margin = 8;
+  const url =
+    "https://api.qrserver.com/v1/create-qr-code/" +
+    `?size=${size}x${size}&margin=${margin}&data=${encodeURIComponent(addr)}`;
+
+  const img = document.createElement("img");
+  img.alt = "QR code";
+  img.src = url;
+
+  img.onerror = () => {
+    box.innerHTML = "";
+    const div = document.createElement("div");
+    div.className = "tiny warn";
+    div.textContent = "QR blocked by CSP / no internet. Use Copy address.";
+    box.appendChild(div);
+  };
+
+  box.appendChild(img);
+}
+
+const goConnect = $("goConnect");
+if (goConnect) {
+  goConnect.addEventListener("click", async () => {
+    try {
+      if (!provider()) { toast("Extension provider not detected"); return; }
+      toast("Connecting…");
+      await connectExtension();
+      toast("Connected ✅");
+      await refreshWallets();
+      await syncBalance();
+      renderWalletList();
+      updateReceiveQR();
+      showPage("page-home");
+    } catch (e) {
+      toast("Connect error: " + (e.message || e));
+    }
+  });
+}
+
+
+const goDisconnect = $("goDisconnect");
+if (goDisconnect) {
+  goDisconnect.addEventListener("click", async () => {
+    disconnectExtensionLocal();
+    await refreshWallets();
+    renderWalletList();
+    await syncBalance();
+    toast("Disconnected");
+    showPage("page-home");
+  });
+}
+
+// If extension gets disconnected/disabled, reflect it on refresh/focus as well
+window.addEventListener("focus", async () => {
+  const before = (getMode() === "ext") && !!EXT_SESSION?.address;
+  const ok = await validateExtensionSession();
+  if (before && !ok) {
+    await refreshWallets();
+    renderWalletList();
+    await syncBalance();
+    toast("Extension disconnected");
+  }
+});
+
+
+$("exDecredinalsPage") && ($("exDecredinalsPage").onclick = () => showPage("page-decredinals"));
+
+(function () {
+  function resetSeq(page){
+    page.querySelectorAll(".seq").forEach(el => el.classList.remove("show"));
+  }
+
+  function runHomeSeq(){
+    const page = document.getElementById("page-home");
+    if(!page || !page.classList.contains("on")) return;
+
+    const account = page.querySelector(".account.seq");
+    const bal = page.querySelector(".bal.seq");
+    const acts = Array.from(page.querySelectorAll(".actions .act.seq"));
+
+    if(!account || !bal || acts.length === 0) return;
+
+    resetSeq(page);
+
+    void account.offsetHeight;
+
+    account.classList.add("show");
+
+    setTimeout(() => {
+      if(!page.classList.contains("on")) return;
+      bal.classList.add("show");
+    }, 500);
+
+    setTimeout(() => {
+      if(!page.classList.contains("on")) return;
+      acts.forEach((btn, i) => {
+        setTimeout(() => {
+          if(!page.classList.contains("on")) return;
+          btn.classList.add("show");
+        }, i * 200);
+      });
+    }, 1500);
+  }
+
+  window.showPage = function(id){
+    showPageCore(id);
+    if(id === "page-home") setTimeout(runHomeSeq, 20);
+  };
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const page = document.getElementById("page-home");
+    if(page){
+      new MutationObserver(() => {
+        if(page.classList.contains("on")) runHomeSeq();
+      }).observe(page, { attributes:true, attributeFilter:["class"] });
+    }
+    setTimeout(runHomeSeq, 20); 
+  });
+})();
+
+</script>
+
+
+</body>
+</html>
