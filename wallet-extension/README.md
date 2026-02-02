@@ -27,5 +27,6 @@ It is distributed via GitHub Releases.
 Decredinals Wallet can be used by websites (dApps) to connect wallets,
 read balances, and request transactions.
 
-**dApp Integration Guide:** ./docs/dapp-integration.md
+**dApp Integration Guide:**
+[`docs/dapp-integration.md`](./docs/dapp-integration.md)
 
