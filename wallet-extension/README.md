@@ -22,5 +22,10 @@ It is distributed via GitHub Releases.
 6. Click **Load unpacked**.
 7. Select the extracted `wallet-extension` folder.
 
+## For Developers
 
+Decredinals Wallet can be used by websites (dApps) to connect wallets,
+read balances, and request transactions.
+
+**dApp Integration Guide:** ./docs/dapp-integration.md
 
