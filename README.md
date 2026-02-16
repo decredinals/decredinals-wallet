@@ -22,7 +22,8 @@ Inscriptions protocol layer enabling on-chain assets, indexing, wallets and mark
 **Links**
 - Website: https://decredinals.com  
 - Documentation: https://docs.decredinals.com  
-- Decredinals Web Wallet: https://wallet.decredinals.com  
+- Decredinals Web Wallet: https://wallet.decredinals.com
+- Decredinals Wallet Chrome Webstore: https://chromewebstore.google.com/detail/decredinals-wallet/bhhacjnlllojmjfdikdfjicllpdkgklg   
 - Twitter / X: https://x.com/decredinals  
 - Telegram: https://t.me/decredinals
 
@@ -107,6 +108,7 @@ This ensures:
 ### 3. Decredinals Wallet Extension (`/wallet-extension`)
 
 A Chromium-based browser extension wallet that mirrors the core functionality of the web wallet in a compact extension format.
+Chrome Web Store - https://chromewebstore.google.com/detail/decredinals-wallet/bhhacjnlllojmjfdikdfjicllpdkgklg
 
 Features:
 - wallet creation and import,
@@ -119,11 +121,11 @@ Features:
 
 ## Browser Extension Installation
 
-The Decredinals Wallet Extension is not published on the Chrome Web Store.
+• Directly from the Chrome Web Store - https://chromewebstore.google.com/detail/decredinals-wallet/bhhacjnlllojmjfdikdfjicllpdkgklg
+• Or manually via GitHub Releases
 
-It is distributed via GitHub Releases.
 
-### Installation Steps
+### Installation Steps from GitHub Releases
 
 1. Open the **Releases** section of this repository - https://github.com/decredinals/decredinals-wallet/releases/tag/v0.0.1
 2. Download the latest archive:
