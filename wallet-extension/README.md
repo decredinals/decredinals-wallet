@@ -2,11 +2,14 @@
 
 ## Browser Extension Installation
 
-The Decredinals Wallet Extension is not published on the Chrome Web Store.
+Decredinals Wallet Extension is now live on the Chrome Web Store.
 
-It is distributed via GitHub Releases.
+### You can install it in two ways:
+1. Directly from the Chrome Web Store -  https://chromewebstore.google.com/detail/decredinals-wallet/bhhacjnlllojmjfdikdfjicllpdkgklg
 
-### Installation Steps
+2. Manually via GitHub Releases
+
+### Installation Steps from GitHub Releases
 
 1. Open the **Releases** section of this repository - https://github.com/decredinals/decredinals-wallet/releases/tag/v0.0.1.
 2. Download the latest archive:
