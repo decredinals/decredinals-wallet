@@ -110,18 +110,20 @@ This ensures:
 A Chromium-based browser extension wallet that mirrors the core functionality of the web wallet in a compact extension format.
 Chrome Web Store - https://chromewebstore.google.com/detail/decredinals-wallet/bhhacjnlllojmjfdikdfjicllpdkgklg
 
-Features:
+Features (v0.0.2):
 - wallet creation and import,
 - management of multiple wallets with easy switching,
 - sending and receiving DCR,
 - viewing balances and transaction history,
+- X integration allows users to link their account and enable DCR tipping functionality directly on X posts,
 - foundation for future dApp and protocol integrations.
 
 ---
 
 ## Browser Extension Installation
 
-• Directly from the Chrome Web Store - https://chromewebstore.google.com/detail/decredinals-wallet/bhhacjnlllojmjfdikdfjicllpdkgklg
+• Directly from the Chrome Web Store  - https://chromewebstore.google.com/detail/decredinals-wallet/bhhacjnlllojmjfdikdfjicllpdkgklg
+
 • Or manually via GitHub Releases
 
 
