@@ -6,7 +6,8 @@ Decredinals wallet allows users to:
 - create and manage multiple Decred wallets,
 - send and receive DCR,
 - view balances and transaction history,
-- securely manage keys locally without exposing private data.
+- securely manage keys locally without exposing private data,
+- X integration allows users to link their account and enable DCR tipping functionality directly on X posts (available on Decredinals Wallet Extension v0.0.2).
 
 The wallet is developed as the foundation for future Decredinals protocol support and inscription-related functionality.
 
