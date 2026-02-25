@@ -1,4 +1,12 @@
 
+## Decredinals Wallet is a non-custodial Decred wallet in your browser.
+
+- Create or import wallets, manage multiple accounts and copy addresses in one click.
+- Send and receive DCR with fast signing — keys stay on your device.
+- Connect to Decred dApps: the extension injects a provider so websites can request addresses and transactions with your approval.
+- Optional X integration allows users to link their account and enable DCR tipping functionality directly on supported posts.
+  
+Get Decredinals Wallet and start using Decred on the web:
 
 ## Browser Extension Installation
 
